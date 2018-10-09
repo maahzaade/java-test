@@ -11,14 +11,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Path("/users")
 @Repository
 public class UserResource{
 
-    public UserDao userDao;
+    //have global userdDao to prevent redundant code in each methods of this class
+    public UserDao userDao = UserDao.getUserDao();
 
     @GET
     @Path("add/")
@@ -30,10 +30,6 @@ public class UserResource{
         user.setName(name);
         user.setEmail(email);
         user.setRoles(roles);
-
-        if (userDao == null) {
-            userDao = UserDao.getUserDao();
-        }
 
         userDao.saveUser(user);
         return Response.ok().entity(user).build();
@@ -50,10 +46,6 @@ public class UserResource{
         user.setEmail(email);
         user.setRoles(roles);
 
-        if (userDao == null) {
-            userDao = UserDao.getUserDao();
-        }
-
         userDao.updateUser(user);
         return Response.ok().entity(user).build();
     }
@@ -68,10 +60,6 @@ public class UserResource{
         user.setEmail(email);
         user.setRoles(roles);
 
-        if (userDao == null) {
-            userDao = UserDao.getUserDao();
-        }
-
         userDao.deleteUser(user);
         return Response.ok().entity(user).build();
     }
@@ -85,9 +73,6 @@ public class UserResource{
     	});
     	userDao = context.getBean(UserDao.class);
     	List<User> users = userDao.getUsers();
-    	if (users == null) {
-    		users = new ArrayList<User>();
-    	}
 
         GenericEntity<List<User>> usersEntity = new GenericEntity<List<User>>(users) {};
         return Response.status(200).entity(usersEntity).build();
@@ -97,11 +82,7 @@ public class UserResource{
     @Path("search/")
     public Response findUser(@QueryParam("name") String name) {
 
-        if (userDao == null) {
-            userDao = UserDao.getUserDao();
-        }
-
-        User user = userDao.findUser(name);
-        return Response.ok().entity(user).build();
+        List<User> users = userDao.findUser(name);
+        return Response.ok().entity(users).build();
     }
 }
